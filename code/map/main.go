@@ -1,22 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	colors := map[string]string{
 		"red":   "#ff0000",
-		"green": "#4bf745",
-		"white": "#ffffff",
+		"blue":  "#4b0000",
+		"green": "#0bdd00",
 	}
-
-	colors["yellow"] = "laksjdf"
-	delete(colors, "yellow")
-
 	printMap(colors)
 }
 
 func printMap(c map[string]string) {
 	for color, hex := range c {
-		fmt.Println("Hex code for", color, "is", hex)
+		fmt.Printf("The hex code for %s is %s\n", color, hex)
 	}
 }

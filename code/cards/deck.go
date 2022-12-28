@@ -4,29 +4,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 )
 
-// Create a new type of 'deck'
-// which is a slice of strings
+// A type deck that is a slice of string
 type deck []string
 
-func newDeck() deck {
-	cards := deck{}
-
-	cardSuits := []string{"Spades", "Diamonds", "Hearts", "Clubs"}
-	cardValues := []string{"Ace", "Two", "Three", "Four"}
-
-	for _, suit := range cardSuits {
-		for _, value := range cardValues {
-			cards = append(cards, value+" of "+suit)
-		}
-	}
-
-	return cards
-}
+const DELIM = ","
 
 func (d deck) print() {
 	for i, card := range d {
@@ -34,38 +19,40 @@ func (d deck) print() {
 	}
 }
 
-func deal(d deck, handSize int) (deck, deck) {
-	return d[:handSize], d[handSize:]
+func newDeck() deck {
+	cards := deck{}
+	names := []string{"Diamonds", "Clubs"}
+	values := []string{"Ace", "One", "Two", "Three"}
+	for _, name := range names {
+		for _, value := range values {
+			cards = append(cards, value+" of "+name)
+		}
+	}
+	return cards
 }
 
+// Returns (1) a new deck of size n and (2) old deck containing len-n cards
+func deal(d deck, n int) (deck, deck) {
+	return d[:n], d[n:]
+}
+
+// Joins deck elements by DELIM
 func (d deck) toString() string {
-	return strings.Join([]string(d), ",")
+	return strings.Join(d, DELIM)
 }
 
 func (d deck) saveToFile(filename string) error {
-	return ioutil.WriteFile(filename, []byte(d.toString()), 0666)
+	return ioutil.WriteFile(filename, []byte(d.toString()), 0644)
 }
 
-func newDeckFromFile(filename string) deck {
-	bs, err := ioutil.ReadFile(filename)
-	if err != nil {
-		// Option #1 - log the error and return a call to newDeck()
-		// Option #2 - Log the error and entirely quit the program
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	s := strings.Split(string(bs), ",")
-	return deck(s)
+func newDeckFromFile(filename string) (deck, error) {
+	content, err := ioutil.ReadFile(filename)
+	return strings.Split(string(content), DELIM), err
 }
 
 func (d deck) shuffle() {
-	source := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(source)
-
-	for i := range d {
-		newPosition := r.Intn(len(d) - 1)
-
-		d[i], d[newPosition] = d[newPosition], d[i]
-	}
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(d), func(i, j int) {
+		d[i], d[j] = d[j], d[i]
+	})
 }
